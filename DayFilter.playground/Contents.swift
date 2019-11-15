@@ -1,7 +1,7 @@
 import UIKit
 
 //var dayNames = ["This Afternoon", "Monday", "Holiday", "Wednesday", "Thursday"]
-var dayPlusNight = ["This Afternoon", "Tonight", "Monday", "Monday Night", "Tuesday", "Tuesday Night", "Wednesday", "Holiday"]
+var dayPlusNight = ["This Afternoon", "Tonight", "Holiday", "Monday Night", "Holiday", "Tuesday Night", "Wednesday", "Holiday"]
 //var nightNames = ["Tonight", "Monday Night", "Tuesday Night", "Wednesday Night", "Thursday Night"]
 
 // Mode values: Day, Night, Day+Night
@@ -80,14 +80,20 @@ func removeNilDay(list: [String?], mode: String) -> [String] {
     // Create a mutable copy of dayNames array
     for day in list {
         noNilDays.append(day)
+        if let weekday = day {
+            print("weekDay: \(weekday)")
+        } else {
+            print("weekDayNil: nil")
+        }
     }
     
-    var index = 0
-    while index < noNilDays.count {
+    var index = noNilDays.startIndex
+    while index < noNilDays.endIndex {
         switch noNilDays[index] {
         case nil:
-            if noNilDays[index] == noNilDays.last {
-                print("list[index] == list.last, index: \(index)")
+           // if noNilDays[index] == noNilDays.last {
+            if index == noNilDays.endIndex - 1 {
+                print("index == last index, index: \(index)")
                 if isValid(day: noNilDays[index - 1]) {
                     let nextDay = next(day: noNilDays[index - 1], display: mode)
                     print("nextDay: \(nextDay ?? "")")
