@@ -1,8 +1,9 @@
 import UIKit
 
 //var dayNames = ["This Afternoon", "Monday", "Holiday", "Wednesday", "Thursday"]
-var dayPlusNight = ["This Afternoon", "Tonight", "Holiday", "Monday Night", "Holiday", "Tuesday Night", "Wednesday", "Holiday"]
-//var nightNames = ["Tonight", "Monday Night", "Tuesday Night", "Wednesday Night", "Thursday Night"]
+//var dayPlusNight = ["Sunday", "Sunday Night", "Monday", "Monday Night", "Tuesday", "Tuesday Night", "Wednesday", "Holiday"]
+//var dayPlusNight = ["Holiday", "Holiday", "Holiday", "Holiday", "Holiday", "Holiday", "Holiday", "Holiday"]
+var nightNames = ["Tonight", "Holiday", "Tuesday Night", "Wednesday Night", "Thursday Night"]
 
 // Mode values: Day, Night, Day+Night
 func filterValid(days: [String], displayMode: String) -> [String] {
@@ -87,26 +88,51 @@ func removeNilDay(list: [String?], mode: String) -> [String] {
         }
     }
     
-    var index = noNilDays.startIndex
+   var index = noNilDays.startIndex
     while index < noNilDays.endIndex {
+        print("index: \(index)")
         switch noNilDays[index] {
         case nil:
-           // if noNilDays[index] == noNilDays.last {
+           // Check if index is the last index
             if index == noNilDays.endIndex - 1 {
                 print("index == last index, index: \(index)")
                 if isValid(day: noNilDays[index - 1]) {
                     let nextDay = next(day: noNilDays[index - 1], display: mode)
                     print("nextDay: \(nextDay ?? "")")
                     noNilDays[index] = nextDay
+                    index = index + 1
+                    continue
+                } else {
+                    // Exit while loop as no solution can be found
+                    index = index + 1
+                    continue
                 }
             } else {
+                // Go to the previous index and check if it is valid
+               if index > noNilDays.startIndex && isValid(day: noNilDays[index - 1]) {
+                    let nextDay = next(day: noNilDays[index - 1], display: mode)
+                    if nextDay == nil {
+                        index = index + 1
+                        continue
+                    } else {
+                        print("nextDay: \(nextDay ?? "")")
+                        noNilDays[index] = nextDay
+                        index = 0
+                        continue
+                    }
+                } else
                 // Go to the next value and check if it is valid
-                if isValid(day: noNilDays[index + 1]) {
+                if index < noNilDays.endIndex - 1 && isValid(day: noNilDays[index + 1]) {
                     let previousDay = previous(day: noNilDays[index + 1], display: mode)
-                    print("previousDay: \(previousDay ?? "")")
-                    noNilDays[index] = previousDay
-                    index = 0                              // Start over and check for nils
-                    continue
+                    if previousDay == nil {
+                        index = index + 1
+                        continue
+                    } else {
+                        print("previousDay: \(previousDay ?? "")")
+                        noNilDays[index] = previousDay
+                        index = 0                              // Start over and check for nils
+                        continue
+                    }
                 } else {
                     index = index + 1
                     continue
@@ -116,14 +142,15 @@ func removeNilDay(list: [String?], mode: String) -> [String] {
             index = index + 1
         }
     } // while
-    return noNilDays.compactMap({$0})
+ 
+    return noNilDays.compactMap({$0})                      // Return non-optional array type
 }
 
 func next(day: String?, display: String) -> String? {
     
     var next: String? = String()
     
-    if display == "Day" || display == "Night" {
+    if display == "Day" {
         switch day {
         case "Sunday": next = "Monday"
         case "Monday": next = "Tuesday"
@@ -135,7 +162,21 @@ func next(day: String?, display: String) -> String? {
         default:
             next = nil
         }
-    } else if display == "Day+Night" {
+    }
+    else if display == "Night" {
+        switch day {
+        case "Saturday Night": next = "Sunday Night"
+        case "Sunday Night": next = "Monday Night"
+        case "Monday Night": next = "Tuesday Night"
+        case "Tuesday Night": next =  "Wednesday Night"
+        case "Wednesday Night": next = "Thursday Night"
+        case "Thursday Night": next = "Friday Night"
+        case "Friday Night": next = "Saturday Night"
+        default:
+            next = nil
+        }
+    }
+    else if display == "Day+Night" {
         switch day {
         case "Sunday": next = "Sunday Night"
         case "Monday": next = "Monday Night"
@@ -162,7 +203,7 @@ func previous(day: String?, display: String) -> String? {
     
     var previous: String? = String()
     
-    if display == "Day" || display == "Night" {
+    if display == "Day" {
         switch day {
         case "Sunday": previous = "Saturday"
         case "Monday": previous = "Sunday"
@@ -173,7 +214,20 @@ func previous(day: String?, display: String) -> String? {
         case "Saturday": previous = "Friday"
         default: previous = nil
         }
-    } else if display == "Day+Night" {
+    }
+    else if display == "Night" {
+        switch day {
+        case "Sunday Night": previous = "Saturday Night"
+        case "Monday Night": previous = "Sunday Night"
+        case "Tuesday Night": previous = "Monday Night"
+        case "Wednesday Night": previous =  "Tuesday Night"
+        case "Thursday Night ": previous = "Wednesday Night"
+        case "Friday Night": previous = "Thursday Night"
+        case "Saturday Night": previous = "Friday Night"
+        default: previous = nil
+        }
+    }
+    else if display == "Day+Night" {
         switch day {
         case "Sunday": previous = "Saturday Night"
         case "Monday": previous = "Sunday Night"
@@ -214,7 +268,7 @@ func isValid(day: String?) -> Bool {
     return validDay
 }
 
-let filtered = filterValid(days: dayPlusNight, displayMode: "Day+Night")
+let filtered = filterValid(days: nightNames, displayMode: "Night")
 
 // Display final list of valid days
 for day in filtered {
